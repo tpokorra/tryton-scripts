@@ -57,10 +57,8 @@ create_db:
 
 webclient:
 	git clone --single-branch --branch ${TRYTON_VERSION} https://github.com/tryton/sao.git ${TRYTON_PATH}/sao
-	source ${HOME}/.profile
-	cd ${TRYTON_PATH}/sao && npm install bower po2json grunt-po2json grunt
-	cd ${TRYTON_PATH}/sao && npm install --production
-	cd ${TRYTON_PATH}/sao && node_modules/grunt/bin/grunt
+	source ${HOME}/.profile && cd ${TRYTON_PATH}/sao && npm install bower po2json grunt-po2json grunt && npm install --production
+	cd ${TRYTON_PATH}/sao && node_modules/grunt/bin/grunt --force
 
 node:
 	git clone https://github.com/OiNutter/nodenv.git ~/.nodenv

@@ -1,5 +1,6 @@
 # Makefile to install a development environment and work with Tryton
 
+NODE_VERSION = 14.16.1
 TRYTON_VERSION := 5.8
 TRYTON_PATH := ${HOME}/tryton
 NODE_PATH := ${HOME}/.nodenv/bin
@@ -19,7 +20,7 @@ quickstart_debian: debian_packages quickstart
 
 debian_packages:
 	sudo apt update
-	sudo apt install python3-venv python3-dev -y
+	sudo apt install python3-venv python3-dev wget -y
 	
 quickstart_fedora: fedora_packages quickstart
 
@@ -39,6 +40,7 @@ create_venv:
 	cd ${TRYTON_PATH} && python3 -m venv ${VENV_PATH}
 
 pip_packages:
+	${VENV} pip install wheel
 	${VENV} pip install -r requirements.txt
 
 inifile:
@@ -58,16 +60,16 @@ create_db:
 webclient:
 	git clone --single-branch --branch ${TRYTON_VERSION} https://github.com/tryton/sao.git ${TRYTON_PATH}/sao
 	source ${HOME}/.profile && cd ${TRYTON_PATH}/sao && npm install bower po2json grunt-po2json grunt && npm install --production
-	cd ${TRYTON_PATH}/sao && node_modules/grunt/bin/grunt --force
+	source ${HOME}/.profile && cd ${TRYTON_PATH}/sao && node_modules/grunt/bin/grunt --force
 
 node:
 	git clone https://github.com/OiNutter/nodenv.git ~/.nodenv
 	echo 'export PATH="${HOME}/.nodenv/bin:${PATH}"' >> ~/.profile
 	echo 'eval "$$(nodenv init -)"' >> ~/.profile
 	git clone git://github.com/OiNutter/node-build.git ~/.nodenv/plugins/node-build
-	${NODE_PATH}/nodenv install 12.18.4
+	${NODE_PATH}/nodenv install ${NODE_VERSION}
 	${NODE_PATH}/nodenv rehash
-	${NODE_PATH}/nodenv global 12.18.4
+	${NODE_PATH}/nodenv global ${NODE_VERSION}
 
 runserver:
 	cd ${TRYTON_PATH} && ${VENV} python ${VENV_PATH}/bin/trytond -c tryton.ini

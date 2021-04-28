@@ -1,4 +1,3 @@
-wheel
 trytond
 trytond_sale
 psycopg2-binary

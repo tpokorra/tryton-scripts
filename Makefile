@@ -1,10 +1,13 @@
 # Makefile to install a development environment and work with Tryton
 
-VENV := . ${HOME}/.venv/bin/activate &&
 TRYTON_VERSION := 5.8
 TRYTON_PATH := ${HOME}/tryton
 NODE_PATH := ${HOME}/.nodenv/bin
+VENV_PATH := ${HOME}/tryton/.venv
+VENV := . ${VENV_PATH}/bin/activate &&
 SHELL := /bin/bash
+INITIAL_EMAIL := "admin@example.org"
+INITIAL_PWD := "admindemo"
 
 all:
 	@echo
@@ -29,10 +32,11 @@ quickstart: create_venv pip_packages inifile create_db node webclient
 	@echo Installation has finished successfully
 	@echo Run '"'make runserver'"' in order to start the server and access it through one of the following IP addresses
 	@ip addr | sed 's/\/[0-9]*//' | awk '/inet / {print "http://" $$2 ":8000/"}'
-	@echo Login user is '"'admin'"' password is '"'admindemo'"'
+	@echo Login user is '"'admin'"' password is '"'${INITIAL_PWD}'"'
 
 create_venv:
-	cd ${HOME} && python3 -m venv .venv
+	mkdir -p ${TRYTON_PATH}
+	cd ${TRYTON_PATH} && python3 -m venv ${VENV_PATH}
 
 pip_packages:
 	${VENV} pip install -r requirements.txt
@@ -48,7 +52,8 @@ inifile:
 
 create_db:
 	touch ${TRYTON_PATH}/tryton-dev.sqlite
-	${VENV} python ${HOME}/.venv/bin/trytond-admin -c ${TRYTON_PATH}/tryton.ini -d tryton-dev --all
+	@echo "${INITIAL_PWD}" > ${TRYTON_PATH}/initialpwd.txt
+	export TRYTONPASSFILE=${TRYTON_PATH}/initialpwd.txt && ${VENV} python ${VENV_PATH}/bin/trytond-admin -c ${TRYTON_PATH}/tryton.ini -d tryton-dev --all --email=${INITIAL_EMAIL}
 
 webclient:
 	git clone --single-branch --branch ${TRYTON_VERSION} https://github.com/tryton/sao.git ${TRYTON_PATH}/sao
@@ -67,7 +72,7 @@ node:
 	${NODE_PATH}/nodenv global 12.18.4
 
 runserver:
-	cd ${TRYTON_PATH} && ${VENV} python ${HOME}/.venv/bin/trytond -c tryton.ini
+	cd ${TRYTON_PATH} && ${VENV} python ${VENV_PATH}/bin/trytond -c tryton.ini
 
-clean:
-	cd ${HOME} && rm -Rf .venv .nodenv tryton .cache .npm
+remove:
+	cd ${HOME} && rm -Rf .nodenv .cache .npm ${TRYTON_PATH}
